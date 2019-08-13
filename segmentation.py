@@ -45,32 +45,8 @@ def backgroundExtract(frames):
 
     return avg
 
-def robotSegment(img, bg, th):
-    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY).astype('float32')
-    bg_gray = cv2.cvtColor(bg, cv2.COLOR_BGR2GRAY).astype('float32')
 
-    #img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    #bg_hsv = cv2.cvtColor(bg, cv2.COLOR_BGR2HSV)
-
-    thresh = th
-
-    sub = np.abs(img_gray - bg_gray)
-    sub = (sub>thresh)*255
-    sub = sub.astype('uint8')
-
-    kernel1 = np.ones((2, 2), np.uint8)
-    kernel2 = np.ones((3, 3), np.uint8)
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
-    #erosion = cv2.erode(sub,kernel,iterations = 1)
-
-    # Openning operation to remove noise
-    res = cv2.morphologyEx(sub, cv2.MORPH_OPEN, kernel1)
-    res = cv2.morphologyEx(res, cv2.MORPH_CLOSE, kernel2)
-
-    return res
-
-
-def robotSegmentv2(img, bg):
+def robotSegment(img, bg):
 
     # Color Threshold
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -110,6 +86,54 @@ def robotSegmentv2(img, bg):
 
     return res
 
+
+def robotSegment_v2(img, bg):
+
+    # Color Threshold
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    lower_bound = np.array([45, 70, 70])
+    upper_bound = np.array([75, 255, 255])
+
+    mask = cv2.inRange(img_hsv, lower_bound, upper_bound)
+    mask_inv = cv2.bitwise_not(mask)
+
+    img_mask = cv2.bitwise_and(img, img, mask=mask_inv)
+    bg_mask = cv2.bitwise_and(bg, bg, mask=mask_inv)
+
+    img_gray = cv2.cvtColor(img_mask, cv2.COLOR_BGR2GRAY).astype('float32')
+    bg_gray = cv2.cvtColor(bg_mask, cv2.COLOR_BGR2GRAY).astype('float32')
+
+    img_gray = cv2.GaussianBlur(img_gray,(5,5),0)
+    bg_gray = cv2.GaussianBlur(bg_gray,(5,5),0)
+
+
+    sub = np.abs(img_gray - bg_gray)
+    
+    lower = np.round(np.min(sub))
+    upper = np.round(np.max(sub))
+    ret, th = cv2.threshold(sub.astype('uint8'), 0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    lower_bound = np.array([45, 70, 70])
+    upper_bound = np.array([75, 255, 255])
+
+    mask = cv2.inRange(img_hsv, lower_bound, upper_bound)
+    mask_inv = cv2.bitwise_not(mask)
+
+    th = cv2.bitwise_and(th, th, mask=mask_inv)
+
+    kernel1 = np.ones((2, 2), np.uint8)
+    kernel2 = np.ones((3, 3), np.uint8)
+    #kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
+    #erosion = cv2.erode(sub,kernel,iterations = 1)
+
+    # Openning operation to remove noise
+    e = cv2.morphologyEx(th, cv2.MORPH_ERODE, kernel1)
+    res = cv2.morphologyEx(e, cv2.MORPH_DILATE, kernel2)
+
+    return res
+
+
 def downsample(img, sample_interval = 10):
 
     x, y = np.where(img == 255)
@@ -144,8 +168,8 @@ def imshow_components(labels):
     cv2.waitKey()
 
 
-
-def ransacCurveFit(seg_img, degree = 7, trials = 100):
+def ransacCurveFit(seg_img, pt_end = None, degree = 7, trials = 100, sampleNum = 100):
+# Find all the data points in mask
     data = np.where(seg_img==255)
     X,y = data[0], data[1]
     X = X.reshape(-1,1)
@@ -159,18 +183,18 @@ def ransacCurveFit(seg_img, degree = 7, trials = 100):
     ransac.fit(X,y)
 
     # Prepare to plot the curve
-    #low = min(X[:,1])
     low = 55
-    upper = max(X[:,1])
-    point_num = upper - low + 1
+    if pt_end = None:
+        upper = max(X[:,1])
+    else:
+        upper = pt_end
 
-    x_plot = np.linspace(low, upper, point_num).astype('int')
-    x_plot_t = poly.fit_transform(x_plot.reshape(-1,1))
-    y_plot = ransac.predict(x_plot_t).astype('int')
+    point_num = sampleNum
 
-    curve_fit = np.zeros(seg_img.shape)
-    for x, y in zip(x_plot, y_plot):
-        if x < upper:
-            curve_fit[x,y] = 255
 
-    return curve_fit
+    x_sample = np.linspace(low, upper, point_num)
+    x_sample_trans = poly.fit_transform(x_sample.reshape(-1,1))
+    y_sample = ransac.predict(x_sample_trans)
+    
+    pts = np.vstack((y_sample, x_sample))
+    return pts
