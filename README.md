@@ -6,7 +6,7 @@ In this project,  a vision-based system is designed to achieve tracking and shap
 
 
 
-<img src="./intro_fig/CTR.jpg" width="600">
+<img src="./intro_fig/CTR.JPG" width="600">
 
 ## Dataset
 
@@ -50,7 +50,7 @@ Calibration is done using Zhang's method which is integrated in OpenCV library. 
 
 1. Collecting corresponding points by prior knowledge. Here we label ending points and joint points as reliable correspondences.
 
-   <img src="./intro_fig/corpts.jpg" width="800">
+   <img src="./intro_fig/corpts.JPG" width="800">
 
    
 
@@ -58,7 +58,7 @@ Calibration is done using Zhang's method which is integrated in OpenCV library. 
 
    
 
-   <img src="./intro_fig/camera_setting.jpg" width="600">
+   <img src="./intro_fig/camera_setting.JPG" width="600">
 
 3. Verification on epipolar lines
 
@@ -70,5 +70,5 @@ Calibration is done using Zhang's method which is integrated in OpenCV library. 
 
 Apply direct linear transformation (DLT) based on obtained geometric relation.
 
-<img src="./intro_fig/res.jpg" width="600">
+<img src="./intro_fig/res.JPG" width="600">
 

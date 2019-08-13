@@ -4,7 +4,20 @@ import cv2
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+def imshow(img, size=None):
+    if size == None:
+        plt.figure(figsize=(14,18))
+    else:
+        plt.figure(figsize=size)
+    plt.imshow(img)
+    plt.show()
 
+def imshow2(img):
+    cv2.imshow("img", img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+    
 def drawPoints(img, pts, colors):
     for pt, color in zip(pts, colors):
         cv2.circle(img, tuple(pt), 2, color, -1)
