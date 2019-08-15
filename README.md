@@ -70,5 +70,5 @@ Calibration is done using Zhang's method which is integrated in OpenCV library. 
 
 Apply direct linear transformation (DLT) based on obtained geometric relation.
 
-<img src="./intro_fig/res.JPG" width="600">
+<img src="./intro_fig/res.JPG" width="500">
 

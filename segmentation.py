@@ -21,6 +21,7 @@ def imshow2(img):
     cv2.destroyAllWindows()
 
 def backgroundExtract(frames):
+	# Running average
     avgR, avgG, avgB = None, None, None
     fcnt = 0
     for frame in frames:
@@ -45,6 +46,37 @@ def backgroundExtract(frames):
 
     return avg
 
+def backgroundExtract_v2(images):
+    # Median pixels
+    B_collect, G_collect, R_collect = None, None, None
+    for frame in tqdm_notebook(images):
+        if frame is None:
+            break
+        frame = cv2.imread(frame)
+        #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        B, G, R = cv2.split(frame.astype("float"))
+        if B_collect is None:
+            B_collect = B
+            G_collect = G
+            R_collect = R
+        else:
+            B_collect = np.dstack((B_collect, B))
+            G_collect = np.dstack((G_collect, G))
+            R_collect = np.dstack((R_collect, R))
+
+    h, w = B_collect.shape[0], B_collect.shape[1]
+    mdB, mdG, mdR = np.zeros((h,w)), np.zeros((h,w)), np.zeros((h,w))
+    w_list = list(range(w))
+    h_list = list(range(h))
+    for i in h_list:
+        for j in w_list:
+            mdB[i][j] = np.median(B_collect[i][j])
+            mdG[i][j] = np.median(G_collect[i][j])
+            mdR[i][j] = np.median(R_collect[i][j])
+
+    med = cv2.merge([mdB, mdG, mdR]).astype('uint8')
+    
+    return med
 
 def robotSegment(img, bg):
 
