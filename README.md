@@ -1,12 +1,18 @@
 # Image based Localization and Tracking of a Continuum Flexible Robot
 
-Image-based-Localization-and-Tracking-of-a-Contiuum-Flexible-Robot
+## Intro
 
 In this project,  a vision-based system is designed to achieve tracking and shape estimation of Concentric Tube Robot (CTR) based on binocular stereo images.  The system consists of two main stages which are segmentation and 3D reconstruction. The CTR is firstly segmented from stereo image pair by background removal techniques.  Then epipolar geometry constraints in binocular stereo vision are applied to reconstruct robot 3D shape.  The structure of CTR is shown in figure below.
 
 
 
 <img src="./intro_fig/CTR.JPG" width="600">
+
+## Dependencies
+
+- Python 3.7
+- OpenCV 3.4
+- Scikit-learn
 
 ## Dataset
 
